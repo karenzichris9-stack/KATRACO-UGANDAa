@@ -1000,5 +1000,155 @@ function openLB(k){document.getElementById('lbImg').src=_ug[k];document.getEleme
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('lbOverlay').classList.remove('open');document.body.style.overflow='';} });
 </script>
 </section>
+<script>
+(function () {
+
+  /* ── 1. LOGO BACKGROUND FIX ──────────────────────────────── */
+  const navLogo = document.querySelector('.nav-logo img');
+  if (navLogo) {
+    navLogo.style.cssText += `
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      display: block;
+    `;
+  }
+
+  /* ── 2. HERO PARALLAX SLIDESHOW ──────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+
+    /* --- Grab the fleet images from the _ug object --- */
+    const imageSrcs = typeof _ug === 'object'
+      ? Object.values(_ug)
+      : [];
+
+    /* --- Remove the fleet gallery section --- */
+    const gallerySection = document.getElementById('fleet-photos');
+    if (gallerySection) gallerySection.remove();
+
+    if (imageSrcs.length === 0) return;
+
+    /* --- Find the hero section (first <section> in the page) --- */
+    const heroSection = document.querySelector('section');
+    if (!heroSection) return;
+
+    /* --- Inject CSS --- */
+    const style = document.createElement('style');
+    style.textContent = `
+      .katraco-hero {
+        position: relative;
+        overflow: hidden;
+      }
+      .ks-slideshow {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+      }
+      .ks-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        opacity: 0;
+        transform: scale(1.06);
+        transition: opacity 1.6s ease-in-out, transform 8s ease-out;
+        will-change: transform, opacity;
+      }
+      .ks-slide.ks-active {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .ks-slideshow::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.52);
+        z-index: 1;
+      }
+      .katraco-hero > *:not(.ks-slideshow) {
+        position: relative;
+        z-index: 2;
+      }
+      .ks-dots {
+        position: absolute;
+        bottom: 22px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        display: flex;
+        gap: 8px;
+      }
+      .ks-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.4);
+        cursor: pointer;
+        border: none;
+        padding: 0;
+        transition: background 0.3s, transform 0.3s;
+      }
+      .ks-dot.ks-dot-active {
+        background: #ffffff;
+        transform: scale(1.3);
+      }
+    `;
+    document.head.appendChild(style);
+
+    /* --- Build slideshow --- */
+    heroSection.classList.add('katraco-hero');
+
+    const slideshowEl = document.createElement('div');
+    slideshowEl.className = 'ks-slideshow';
+
+    imageSrcs.forEach((src, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'ks-slide' + (i === 0 ? ' ks-active' : '');
+      slide.style.backgroundImage = `url('${src}')`;
+      slideshowEl.appendChild(slide);
+    });
+
+    heroSection.insertBefore(slideshowEl, heroSection.firstChild);
+
+    /* --- Dot indicators --- */
+    const dotsEl = document.createElement('div');
+    dotsEl.className = 'ks-dots';
+    imageSrcs.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'ks-dot' + (i === 0 ? ' ks-dot-active' : '');
+      dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      dot.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(dot);
+    });
+    heroSection.appendChild(dotsEl);
+
+    /* --- Autoplay --- */
+    const slides = slideshowEl.querySelectorAll('.ks-slide');
+    const dots   = dotsEl.querySelectorAll('.ks-dot');
+    let current  = 0;
+    let timer;
+
+    function goTo(n) {
+      slides[current].classList.remove('ks-active');
+      dots[current].classList.remove('ks-dot-active');
+      current = (n + slides.length) % slides.length;
+      slides[current].classList.add('ks-active');
+      dots[current].classList.add('ks-dot-active');
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    startTimer();
+    heroSection.addEventListener('mouseenter', () => clearInterval(timer));
+    heroSection.addEventListener('mouseleave', startTimer);
+
+  });
+
+})();
+</script>
 </body>
 </html>
