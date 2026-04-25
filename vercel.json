@@ -1,0 +1,19 @@
+{
+  "buildCommand": "echo 'Static site - no build needed'",
+  "outputDirectory": ".",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/katraco-uganda",
+      "destination": "/KATRACO-UGANDAa.html"
+    },
+    {
+      "source": "/katraco-rwanda",
+      "destination": "/KATRACO-RWANDA.html"
+    }
+  ]
+}
